@@ -77,22 +77,40 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
       setState(() {});
     }
   }
-
-  Future<void> deleteTask(String taskId) async {
-    final NetworkResponse response =
-    await NetworkCaller().getRequest(Urls.deleteTask(taskId));
-    if (response.isSuccess) {
-      _taskListModel.data!.removeWhere((element) => element.sId == taskId);
-      if (mounted) {
-        setState(() {});
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Deletion of task has been failed')));
-      }
-    }
+  DeleteItem(taskId)async{
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Delete!",style: TextStyle(color: Colors.blue)),
+            content: const Text("once delete,you can not get it back",style:TextStyle(color: Colors.grey)),
+            actions: [
+              ElevatedButton(onPressed: () async {
+                Navigator.pop(context);
+                final NetworkResponse response =
+                await NetworkCaller().getRequest(Urls.deleteTask(taskId));
+                if (response.isSuccess) {
+                  _taskListModel.data!.removeWhere((element) => element.sId == taskId);
+                  if (mounted) {
+                    setState(() {});
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Deletion of task has been failed')));
+                  }
+                }
+              }, child: const Text("Yes",style:TextStyle(color: Colors.red))),
+              ElevatedButton(onPressed: (){
+                Navigator.pop(context);
+              }, child: const Text("No",style:TextStyle(color: Colors.green)))
+            ],
+          );
+        }
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +162,7 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
                     return TaskListTile(
                       data: _taskListModel.data![index],
                       onDeleteTap: () {
-                        deleteTask(_taskListModel.data![index].sId!);
+                        DeleteItem(_taskListModel.data![index].sId!);
                       },
                       onEditTap: () {
                        //showEditBottomSheet(_taskListModel.data![index]);

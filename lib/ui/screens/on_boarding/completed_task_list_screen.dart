@@ -12,7 +12,7 @@ import 'package:task_manager_2/data/utils/urls.dart';
 import 'package:task_manager_2/ui/screens/others/add_new_task_screen.dart';
 
 class CompletedTaskListScreen extends StatefulWidget {
-  const CompletedTaskListScreen({Key? key}) : super(key: key);
+  const CompletedTaskListScreen({super.key});
 
   @override
   State<CompletedTaskListScreen> createState() => _CompletedTaskListScreenState();
@@ -87,22 +87,40 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
       setState(() {});
     }
   }
-
-  Future<void> deleteTask(String taskId) async {
-    final NetworkResponse response =
-    await NetworkCaller().getRequest(Urls.deleteTask(taskId));
-    if (response.isSuccess) {
-      _taskListModel.data!.removeWhere((element) => element.sId == taskId);
-      if (mounted) {
-        setState(() {});
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Deletion of task has been failed')));
-      }
-    }
+  DeleteItem(taskId)async{
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Delete!",style: TextStyle(color: Colors.blue)),
+            content: const Text("once delete,you can not get it back",style:TextStyle(color: Colors.grey)),
+            actions: [
+              ElevatedButton(onPressed: () async {
+                Navigator.pop(context);
+                final NetworkResponse response =
+                await NetworkCaller().getRequest(Urls.deleteTask(taskId));
+                if (response.isSuccess) {
+                  _taskListModel.data!.removeWhere((element) => element.sId == taskId);
+                  if (mounted) {
+                    setState(() {});
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Deletion of task has been failed')));
+                  }
+                }
+              }, child: const Text("Yes",style:TextStyle(color: Colors.red))),
+              ElevatedButton(onPressed: (){
+                Navigator.pop(context);
+              }, child: const Text("No",style:TextStyle(color: Colors.green)))
+            ],
+          );
+        }
+    );
   }
+
 
   @override
   void initState() {
@@ -118,9 +136,9 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
       body: ScreenBackground(
         child: Column(
           children: [
-            UserProfileAppBar(),
+            const UserProfileAppBar(),
             isLoading
-                ? LinearProgressIndicator(
+                ? const LinearProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(Colors.green))
                 : Padding(
               padding: const EdgeInsets.all(8.0),
@@ -155,7 +173,7 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
                 itemBuilder: (context, index) {
                   return TaskListTile(
                     data: _taskListModel.data![index],
-                    onDeleteTap: () {deleteTask(_taskListModel.data![index].sId!);},
+                    onDeleteTap: () {DeleteItem(_taskListModel.data![index].sId!);},
                     onEditTap: () {
                       showStatusUpdateBottomSheet(_taskListModel.data![index]);
                     },
@@ -173,9 +191,9 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         elevation: 10,
-        child: Icon(Icons.add,color: Colors.white,size: 30,),
+        child: const Icon(Icons.add,color: Colors.white,size: 30,),
         onPressed: () {
           Navigator.push(
               context,

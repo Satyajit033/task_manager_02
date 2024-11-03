@@ -9,11 +9,10 @@ import 'package:task_manager_2/data/models/summary_count_model.dart';
 import 'package:task_manager_2/data/models/task_list_model.dart';
 import 'package:task_manager_2/data/services/network_caller.dart';
 import 'package:task_manager_2/data/utils/urls.dart';
-import 'package:task_manager_2/ui/screens/on_boarding/new_task_list_screen.dart';
 import 'package:task_manager_2/ui/screens/others/add_new_task_screen.dart';
 
 class ProgressTaskListScreen extends StatefulWidget {
-  const ProgressTaskListScreen({Key? key}) : super(key: key);
+  const ProgressTaskListScreen({super.key});
 
   @override
   State<ProgressTaskListScreen> createState() => _ProgressTaskListScreenState();
@@ -88,22 +87,40 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
       setState(() {});
     }
   }
-
-  Future<void> deleteTask(String taskId) async {
-    final NetworkResponse response =
-    await NetworkCaller().getRequest(Urls.deleteTask(taskId));
-    if (response.isSuccess) {
-      _taskListModel.data!.removeWhere((element) => element.sId == taskId);
-      if (mounted) {
-        setState(() {});
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Deletion of task has been failed')));
-      }
-    }
+  DeleteItem(taskId)async{
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Delete!",style: TextStyle(color: Colors.blue)),
+            content: const Text("once delete,you can not get it back",style:TextStyle(color: Colors.grey)),
+            actions: [
+              ElevatedButton(onPressed: () async {
+                Navigator.pop(context);
+                final NetworkResponse response =
+                await NetworkCaller().getRequest(Urls.deleteTask(taskId));
+                if (response.isSuccess) {
+                  _taskListModel.data!.removeWhere((element) => element.sId == taskId);
+                  if (mounted) {
+                    setState(() {});
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Deletion of task has been failed')));
+                  }
+                }
+              }, child: const Text("Yes",style:TextStyle(color: Colors.red))),
+              ElevatedButton(onPressed: (){
+                Navigator.pop(context);
+              }, child: const Text("No",style:TextStyle(color: Colors.green)))
+            ],
+          );
+        }
+    );
   }
+
 
   @override
   void initState() {
@@ -120,9 +137,9 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
       body: ScreenBackground(
         child: Column(
           children: [
-            UserProfileAppBar(),
+            const UserProfileAppBar(),
             isLoading
-                ? LinearProgressIndicator(
+                ? const LinearProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(Colors.green))
                 : Padding(
               padding: const EdgeInsets.all(8.0),
@@ -157,7 +174,7 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
                 itemBuilder: (context, index) {
                   return TaskListTile(
                     data: _taskListModel.data![index],
-                    onDeleteTap: () {deleteTask(_taskListModel.data![index].sId!);},
+                    onDeleteTap: () {DeleteItem(_taskListModel.data![index].sId!);},
                     onEditTap: () {
                       showStatusUpdateBottomSheet(_taskListModel.data![index]);
                     },
@@ -176,9 +193,9 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         elevation: 10,
-        child: Icon(Icons.add,color: Colors.white,size: 30,),
+        child: const Icon(Icons.add,color: Colors.white,size: 30,),
         onPressed: () {
           Navigator.push(
               context,

@@ -71,13 +71,37 @@ class _UserProfileAppBarState extends State<UserProfileAppBar> {
       actions: [
         IconButton(
           onPressed: () async {
-            await AuthUtility.clearUserInfo();
-            if (mounted) {
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      (route) => false);
-            }
+            showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (BuildContext context){
+                  return AlertDialog(
+                    title: const Text("Log Out!",style: TextStyle(color: Colors.blue)),
+                    content: const Text("Do you want to log out",style:TextStyle(color: Colors.grey)),
+                    actions: [
+                      ElevatedButton(onPressed: () async {
+                        Navigator.pop(context);
+                        await AuthUtility.clearUserInfo();
+                        if (mounted) {
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                  (route) => false);
+                        }
+                        else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Log out failed')));
+                          }
+                        }
+                      }, child: const Text("Yes",style:TextStyle(color: Colors.red))),
+                      ElevatedButton(onPressed: (){
+                        Navigator.pop(context);
+                      }, child: const Text("No",style:TextStyle(color: Colors.green)))
+                    ],
+                  );
+                }
+            );
           },
           icon: const Icon(Icons.logout,color: Colors.white,),
         ),
